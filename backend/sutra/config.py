@@ -14,6 +14,11 @@ class Settings(BaseSettings):
     DATABASE_PATH: str = "sutra_audit.db"
     CORS_ORIGIN: str = "http://localhost:5173"
     
+    # Security & Protection settings
+    DEBUG: bool = False
+    ADMIN_TOKEN: Optional[str] = None
+    RATE_LIMIT_ENABLED: bool = True
+    
     # Telegram Bot configuration (optional, long polling only)
     BOT_TOKEN: Optional[str] = None
     
@@ -30,6 +35,13 @@ class Settings(BaseSettings):
     @property
     def workspace_path(self) -> Path:
         return Path(self.WORKSPACE_ROOT).resolve()
+
+    @property
+    def allowed_origins(self) -> list[str]:
+        origins = [self.CORS_ORIGIN]
+        if "localhost" in self.CORS_ORIGIN:
+            origins.append(self.CORS_ORIGIN.replace("localhost", "127.0.0.1"))
+        return origins
 
 
 settings = Settings()

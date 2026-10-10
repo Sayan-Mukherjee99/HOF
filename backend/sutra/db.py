@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import sqlite3
 import time
 from datetime import datetime, timezone
@@ -10,6 +11,7 @@ from pathlib import Path
 from typing import Any, Optional
 from uuid import uuid4
 
+from sutra.crypto import hash_password, verify_password, hash_token, verify_token
 from sutra.policy import sanitize_secrets
 
 
@@ -26,6 +28,12 @@ class Database:
         # Enable WAL mode for high concurrency
         conn.execute("PRAGMA journal_mode=WAL;")
         conn.execute("PRAGMA synchronous=NORMAL;")
+        # Enforce strict private file permissions (read/write by owner only)
+        try:
+            if os.path.exists(self.db_path):
+                os.chmod(self.db_path, 0o600)
+        except OSError:
+            pass
         return conn
 
     def _init_db(self) -> None:
@@ -46,14 +54,19 @@ class Database:
                 );
             """)
 
-            # Pairing codes table (one-time codes, 5 min expiry)
+            # Pairing codes table (one-time codes, 5 min expiry, storing hash)
             conn.execute("""
                 CREATE TABLE IF NOT EXISTS pairing_codes (
                     code TEXT PRIMARY KEY,
                     expires_at REAL NOT NULL,
-                    used INTEGER NOT NULL DEFAULT 0
+                    used INTEGER NOT NULL DEFAULT 0,
+                    code_hash TEXT
                 );
             """)
+            try:
+                conn.execute("ALTER TABLE pairing_codes ADD COLUMN code_hash TEXT;")
+            except sqlite3.OperationalError:
+                pass
 
             # Paired telegram chat (only one authorized remote supervisor)
             conn.execute("""
@@ -67,6 +80,17 @@ class Database:
                 conn.execute("ALTER TABLE paired_chat ADD COLUMN username TEXT;")
             except sqlite3.OperationalError:
                 pass
+
+            # Users table with secure PBKDF2 password hashes and RBAC roles
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS users (
+                    id TEXT PRIMARY KEY,
+                    username TEXT UNIQUE NOT NULL,
+                    password_hash TEXT NOT NULL,
+                    role TEXT NOT NULL DEFAULT 'supervisor',
+                    created_at TEXT NOT NULL
+                );
+            """)
 
     # ========================================================================
     # APPEND-ONLY AUDIT LOG METHODS (NO UPDATE OR DELETE)
@@ -183,11 +207,12 @@ class Database:
         import secrets
         code = secrets.token_hex(3).upper()  # 6-character hex code
         expires_at = time.time() + ttl_seconds
+        c_hash = hash_token(code)
 
         with self._get_connection() as conn:
             conn.execute(
-                "INSERT INTO pairing_codes (code, expires_at, used) VALUES (?, ?, 0)",
-                (code, expires_at),
+                "INSERT INTO pairing_codes (code, expires_at, used, code_hash) VALUES (?, ?, 0, ?)",
+                (code, expires_at, c_hash),
             )
         return code
 
@@ -195,11 +220,12 @@ class Database:
         """Verify single-use pairing code and set chat_id as authorized chat."""
         clean_code = code.strip().upper()
         now = time.time()
+        c_hash = hash_token(clean_code)
 
         with self._get_connection() as conn:
             cur = conn.execute(
-                "SELECT code, expires_at, used FROM pairing_codes WHERE code = ?",
-                (clean_code,),
+                "SELECT code, expires_at, used, code_hash FROM pairing_codes WHERE code = ? OR code_hash = ?",
+                (clean_code, c_hash),
             )
             row = cur.fetchone()
             if not row:
@@ -210,8 +236,8 @@ class Database:
 
             # Mark code as used
             conn.execute(
-                "UPDATE pairing_codes SET used = 1 WHERE code = ?",
-                (clean_code,),
+                "UPDATE pairing_codes SET used = 1 WHERE code = ? OR code_hash = ?",
+                (clean_code, c_hash),
             )
 
             # Store chat_id as the ONLY authorized supervisor
@@ -221,6 +247,49 @@ class Database:
                 (chat_id, datetime.now(timezone.utc).isoformat(), username),
             )
             return True
+
+    # ========================================================================
+    # USER AUTHENTICATION & RBAC (PBKDF2-HMAC-SHA256)
+    # ========================================================================
+
+    def create_user(self, username: str, password: str, role: str = "supervisor") -> dict[str, Any]:
+        """Create a user with OWASP PBKDF2-HMAC-SHA256 password hash."""
+        clean_user = username.strip().lower()
+        pwd_hash = hash_password(password)
+        user_id = str(uuid4())
+        created_at = datetime.now(timezone.utc).isoformat()
+        with self._get_connection() as conn:
+            conn.execute(
+                "INSERT INTO users (id, username, password_hash, role, created_at) VALUES (?, ?, ?, ?, ?)",
+                (user_id, clean_user, pwd_hash, role, created_at),
+            )
+        return {"id": user_id, "username": clean_user, "role": role, "created_at": created_at}
+
+    def authenticate_user(self, username: str, password: str) -> Optional[dict[str, Any]]:
+        """Verify user credentials using constant-time hash comparison."""
+        clean_user = username.strip().lower()
+        with self._get_connection() as conn:
+            cur = conn.execute(
+                "SELECT id, username, password_hash, role, created_at FROM users WHERE username = ?",
+                (clean_user,),
+            )
+            row = cur.fetchone()
+            if not row:
+                return None
+            if verify_password(password, row["password_hash"]):
+                return {"id": row["id"], "username": row["username"], "role": row["role"]}
+            return None
+
+    def get_user(self, username: str) -> Optional[dict[str, Any]]:
+        """Retrieve user record without exposing the password hash."""
+        clean_user = username.strip().lower()
+        with self._get_connection() as conn:
+            cur = conn.execute(
+                "SELECT id, username, role, created_at FROM users WHERE username = ?",
+                (clean_user,),
+            )
+            row = cur.fetchone()
+            return dict(row) if row else None
 
     def get_paired_chat_id(self) -> Optional[int]:
         """Return the authorized Telegram chat_id, or None if unpaired."""

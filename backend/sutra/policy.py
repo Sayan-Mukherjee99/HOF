@@ -62,6 +62,12 @@ _API_TOKEN_PATTERNS = [
     (re.compile(r"\bxox[baprs]-[a-zA-Z0-9\-]{10,}\b"), "[REDACTED_TOKEN]"),
     # AWS access key ID
     (re.compile(r"\bAKIA[0-9A-Z]{16}\b"), "[REDACTED_AWS_KEY]"),
+    # Google API keys
+    (re.compile(r"\bAIza[0-9A-Za-z\-_]{35}\b"), "[REDACTED_API_KEY]"),
+    # Stripe keys
+    (re.compile(r"\b[sr]k_(?:live|test)_[0-9a-zA-Z]{24,}\b"), "[REDACTED_API_KEY]"),
+    # Discord tokens
+    (re.compile(r"\b[MN][A-Za-z\d]{23,}\.[\w-]{6}\.[\w-]{27,}\b"), "[REDACTED_TOKEN]"),
     # Generic Bearer tokens
     (re.compile(r"(?i)\b(bearer\s+)[A-Za-z0-9_\-\.]{16,}\b"), r"\1[REDACTED_TOKEN]"),
 ]
