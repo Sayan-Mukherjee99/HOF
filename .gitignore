@@ -22,6 +22,7 @@ dist-ssr/
 
 # Secrets & Local Config
 .env
+.env.example
 *.pem
 *.key
 id_rsa*
