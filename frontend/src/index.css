@@ -1,0 +1,136 @@
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: 'Geist Sans';
+  src: url('/fonts/Geist-Variable.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geist Mono';
+  src: url('/fonts/GeistMono-Variable.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@layer base {
+  :root {
+    --font-geist-sans: 'Geist Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-geist-mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+    /* Light Theme (white / zinc-50 / zinc-200) */
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    
+    /* ONE Accent: Blue-500 */
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 0 0% 100%;
+    
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 217.2 91.2% 59.8%;
+    --radius: 0.375rem;
+
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 240 3.8% 46.1%;
+    --sidebar-primary: 217.2 91.2% 59.8%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 10% 3.9%;
+    --sidebar-border: 240 5.9% 90%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    /* Dark Theme (zinc-950, surface zinc-900, border zinc-800, text zinc-50, muted zinc-400) */
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 3.7% 15.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 3.7% 15.9%;
+    --popover-foreground: 0 0% 98%;
+    
+    /* ONE Accent: Blue-500 */
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 0 0% 100%;
+    
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 3.7% 27.5%;
+    --input: 240 3.7% 27.5%;
+    --ring: 217.2 91.2% 59.8%;
+    --radius: 0.375rem;
+
+    --sidebar-background: 240 10% 3.9%;
+    --sidebar-foreground: 240 5% 64.9%;
+    --sidebar-primary: 217.2 91.2% 59.8%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 240 3.7% 27.5%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+}
+
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-slide-in-1 {
+  animation: fadeSlideIn 0.8s ease-out 0.1s both;
+}
+.animate-fade-slide-in-2 {
+  animation: fadeSlideIn 0.8s ease-out 0.2s both;
+}
+.animate-fade-slide-in-3 {
+  animation: fadeSlideIn 0.8s ease-out 0.3s both;
+}
+.animate-fade-slide-in-4 {
+  animation: fadeSlideIn 0.8s ease-out 0.4s both;
+}
+
+.font-instrument-serif {
+  font-family: 'Instrument Serif', Georgia, serif;
+}

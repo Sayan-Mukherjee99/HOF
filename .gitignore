@@ -1,0 +1,46 @@
+# Environments & Dependencies
+.venv/
+venv/
+env/
+node_modules/
+frontend/node_modules/
+
+# Python Cache & Testing
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Build outputs
+frontend/dist/
+dist/
+dist-ssr/
+*.local
+
+# Secrets & Local Config
+.env
+*.pem
+*.key
+id_rsa*
+
+# Database & Storage
+sutra_audit.db*
+*.db
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
+
+# Logs
+logs/
+*.log
+
+# OS & Editor
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
