@@ -20,6 +20,7 @@ import { AuditLogPage } from "@/pages/AuditLogPage"
 import { PolicyPage } from "@/pages/PolicyPage"
 import { api, type AgentState } from "@/lib/api"
 import { cn } from "@/lib/utils"
+import { DataRain } from "@/components/ui/data-rain"
 
 type ConsoleTab = "runtime" | "pairing" | "audit" | "policy"
 
@@ -35,6 +36,8 @@ export function DashboardApp() {
   const { connectionState } = useEventStream()
   const [agentState, setAgentState] = React.useState<AgentState | null>(null)
   const [copiedPill, setCopiedPill] = React.useState(false)
+  const [isConsoleHighlighted, setIsConsoleHighlighted] = React.useState(false)
+  const scrollAnimationRef = React.useRef<number | null>(null)
 
   const consoleRef = React.useRef<HTMLDivElement>(null)
 
@@ -55,13 +58,59 @@ export function DashboardApp() {
 
   const scrollToConsole = (tab?: ConsoleTab) => {
     if (tab) setActiveTab(tab)
-    consoleRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+    const targetEl = consoleRef.current
+    if (!targetEl) return
+
+    if (scrollAnimationRef.current) {
+      cancelAnimationFrame(scrollAnimationRef.current)
+      scrollAnimationRef.current = null
+    }
+
+    const navOffset = 84
+    const elementTop = targetEl.getBoundingClientRect().top
+    const targetY = Math.max(0, elementTop + window.scrollY - navOffset)
+    const startY = window.scrollY
+    const distance = targetY - startY
+    const duration = 850
+    let startTime: number | null = null
+
+    // Silky cubic-bezier / easeOutQuart physics
+    const easeOutQuart = (t: number) => 1 - Math.pow(1 - t, 4)
+
+    const step = (currentTime: number) => {
+      if (!startTime) startTime = currentTime
+      const elapsed = currentTime - startTime
+      const progress = Math.min(elapsed / duration, 1)
+      const ease = easeOutQuart(progress)
+
+      window.scrollTo(0, startY + distance * ease)
+
+      if (progress < 1) {
+        scrollAnimationRef.current = requestAnimationFrame(step)
+      } else {
+        scrollAnimationRef.current = null
+        setIsConsoleHighlighted(true)
+        setTimeout(() => setIsConsoleHighlighted(false), 1900)
+      }
+    }
+
+    scrollAnimationRef.current = requestAnimationFrame(step)
   }
 
   return (
     <div className="min-h-screen bg-[#030305] text-white relative overflow-x-hidden selection:bg-cyan-500/30 selection:text-cyan-200">
+      {/* Full-site Ambient Data Rain Animation from 21st.dev */}
+      <DataRain
+        className="opacity-70"
+        palette={{
+          calm: "#06b6d4",
+          mid: "#8a5cff",
+          hot: "#ec4899",
+        }}
+      />
+
       {/* 48px Sub-pixel Grid Mesh */}
-      <div className="absolute inset-0 bg-grid-mesh pointer-events-none opacity-60 [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]" />
+      <div className="absolute inset-0 bg-grid-mesh pointer-events-none opacity-50 [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]" />
 
       {/* Multi-layered Radial Glowing Holographic Aura */}
       <div className="absolute top-[160px] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[500px] pointer-events-none -z-10 overflow-visible">
@@ -212,7 +261,12 @@ export function DashboardApp() {
           <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-cyan-500/30 via-fuchsia-500/25 to-amber-500/20 blur-xl opacity-60 pointer-events-none" />
 
           {/* Frosted Holographic Glass Outer Frame */}
-          <div className="relative rounded-2xl p-[1px] bg-gradient-to-b from-cyan-400/40 via-fuchsia-500/30 to-white/10 shadow-[0_0_80px_-20px_rgba(6,182,212,0.25)]">
+          <div
+            className={cn(
+              "relative rounded-2xl p-[1px] bg-gradient-to-b from-cyan-400/40 via-fuchsia-500/30 to-white/10 shadow-[0_0_80px_-20px_rgba(6,182,212,0.25)] transition-all duration-300",
+              isConsoleHighlighted && "console-highlight-pulse ring-2 ring-cyan-400/60"
+            )}
+          >
             <div className="bg-[#07070b]/95 backdrop-blur-2xl rounded-2xl border border-white/10 overflow-hidden">
               {/* Terminal HUD Header */}
               <div className="flex flex-wrap items-center justify-between gap-3 px-4 sm:px-6 py-3 border-b border-white/10 bg-white/[0.02]">
