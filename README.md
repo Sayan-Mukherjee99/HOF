@@ -15,23 +15,10 @@
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688.svg)](https://fastapi.tiangolo.com)
 [![Vite + React](https://img.shields.io/badge/Vite-React%2019%20%2B%20TS-646CFF.svg)](https://vitejs.dev)
-[![Tests Passing](https://img.shields.io/badge/tests-28%20passed-brightgreen.svg)](https://github.com/Sayan-Mukherjee99/HOF)
+[![Tests Passing](https://img.shields.io/badge/tests-34%20passed-brightgreen.svg)](https://github.com/Sayan-Mukherjee99/HOF)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 *Control remotely → Execute locally → Stay secure → Keep moving*
-
----
-
-### **AOT × HacktoberFest 26 Software Hackday**
-**Problem Statement:** Open Innovation & Gemma  
-**Theme:** Developer Productivity Tool  
-**Team Name:** The Four Musketeers  
-- **Subhadip Paul** (Team Lead) — [GitHub](https://github.com/subhadip-paul)
-- **Sayan Mukherjee** — [GitHub](https://github.com/Sayan-Mukherjee99)
-- **Aritra Bhattacherjee** — [GitHub](https://github.com/aritra-bhattacherjee)
-- **Sourajit Jash** — [GitHub](https://github.com/sourajit-jash)
-
----
 
 </div>
 
@@ -354,25 +341,17 @@ Or directly via pytest:
 .venv/bin/pytest backend/tests -v
 ```
 
-All **28 unit and integration tests** verify:
+All **34 unit and integration tests** verify:
 - ✅ Strict command risk classification and default-to-HIGH policy enforcement
 - ✅ Path traversal and symlink realpath escape prevention
 - ✅ Secret redaction across logs, events, and Telegram payloads
+- ✅ PBKDF2 password hashing, constant-time token verification, and XSS sanitization
+- ✅ Security headers injection (CSP, frame-ancestors, nosniff, XSS protection)
+- ✅ Admin route token authorization and rate limiting
 - ✅ SQLite WAL mode and append-only database invariants
 - ✅ Pairing lifecycle and zero-response silence for unauthorized users
 - ✅ 120-second approval expiration and duplicate decision rejection
 - ✅ WebSocket event streaming and REST lifecycle endpoints
-
----
-
-## 👥 The Team — The Four Musketeers
-
-Developed during **AOT × HacktoberFest 26 Software Hackday**:
-
-- **Subhadip Paul** (Team Lead) — [GitHub](https://github.com/subhadip-paul)
-- **Sayan Mukherjee** — [GitHub](https://github.com/Sayan-Mukherjee99)
-- **Aritra Bhattacherjee** — [GitHub](https://github.com/aritra-bhattacherjee)
-- **Sourajit Jash** — [GitHub](https://github.com/sourajit-jash)
 
 ---
 
